@@ -1,0 +1,21 @@
+@model CollegeHallBooking.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "Application Error";
+}
+
+<div class="text-center py-5">
+    <div class="display-1 text-warning mb-3"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <h2 class="font-weight-800">Something went wrong</h2>
+    <p class="lead text-muted mb-4">An error occurred while processing your request.</p>
+
+    @if (Model.ShowRequestId)
+    {
+        <p class="text-muted fs-7">
+            <strong>Request ID:</strong> <code>@Model.RequestId</code>
+        </p>
+    }
+
+    <a asp-controller="Account" asp-action="Login" class="btn btn-primary px-4 py-2 font-weight-600 rounded-3 mt-3">
+        <i class="bi bi-house-door me-1"></i> Return to Sign In Page
+    </a>
+</div>

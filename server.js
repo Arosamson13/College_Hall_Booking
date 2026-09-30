@@ -110,12 +110,10 @@ let bookings = [
   }
 ];
 
-// Helper: Check time overlap
 function checkOverlap(hallId, bookingDate, startTime, endTime, excludeId = null) {
   return bookings.some(b => {
     if (b.id === excludeId) return false;
     if (b.hallId == hallId && b.bookingDate === bookingDate && b.status === 'Approved') {
-      // Overlap condition: start1 < end2 && end1 > start2
       return (startTime < b.endTime && endTime > b.startTime);
     }
     return false;
@@ -246,11 +244,10 @@ app.post('/api/departments/create', (req, res) => {
   res.json({ success: true, department: newDept, tempPassword: initialPassword || "Dept@123456" });
 });
 
-// SPA Single Page Interface Endpoint for preview
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'wwwroot', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`College Hall Booking Application Server running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
 });

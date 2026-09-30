@@ -6,12 +6,22 @@ using CollegeHallBooking.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Ensure app binds to Render PORT if provided
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://*:{port}");
+}
+
 // Add services to the container.
 var useSqlite = builder.Configuration.GetValue<bool>("UseSqlite", true);
 
 if (useSqlite)
 {
-    var sqliteConnection = builder.Configuration.GetConnectionString("SqliteConnection") ?? "Data Source=CollegeHallBooking.db";
+    var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+    var dbPath = Path.Combine(baseDir, "CollegeHallBooking.db");
+    var sqliteConnection = $"Data Source={dbPath}";
+    
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlite(sqliteConnection));
 }
@@ -73,9 +83,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseAuthentication();
