@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: college-hall-booking
+    env: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: UseSqlite
+        value: "true"
