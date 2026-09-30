@@ -1,0 +1,12 @@
+{
+  "name": "college-hall-booking-system",
+  "version": "1.0.0",
+  "description": "College Hall Booking System - Web Application Preview Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

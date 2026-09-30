@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>College Hall Booking System - Live Interactive Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <style>
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+    </style>
+</head>
+<body class="bg-surface">
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <div class="logo-icon bg-gradient-primary">
+                        <i class="bi bi-building-fill-check"></i>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-title">UniHall</span>
+                        <span class="brand-subtitle">Booking System</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="avatar bg-gradient-accent">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="currentUserName">Admin User</div>
+                    <div class="user-role badge bg-primary-subtle text-primary" id="currentUserRole">System Admin</div>
+                </div>
+            </div>
+
+            <!-- Role Switcher -->
+            <div class="px-3 pt-3">
+                <label class="text-white-50 fs-8 font-weight-700 text-uppercase d-block mb-1">Select Role Mode</label>
+                <select id="roleSwitcher" class="form-select form-select-sm bg-dark text-white border-secondary">
+                    <option value="admin">Admin Module</option>
+                    <option value="department">Department Module (CSE)</option>
+                </select>
+            </div>
+
+            <ul class="nav-menu mt-2">
+                <!-- Admin Links -->
+                <li class="nav-item admin-only">
+                    <a class="nav-link active" href="#" data-target="admin-dashboard">
+                        <i class="bi bi-grid-1x2-fill"></i> <span>Admin Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item admin-only">
+                    <a class="nav-link" href="#" data-target="admin-halls">
+                        <i class="bi bi-door-open-fill"></i> <span>Manage Halls</span>
+                    </a>
+                </li>
+                <li class="nav-item admin-only">
+                    <a class="nav-link" href="#" data-target="admin-depts">
+                        <i class="bi bi-diagram-3-fill"></i> <span>Departments</span>
+                    </a>
+                </li>
+                <li class="nav-item admin-only">
+                    <a class="nav-link" href="#" data-target="admin-requests">
+                        <i class="bi bi-calendar-check-fill"></i> <span>Pending Approvals</span>
+                    </a>
+                </li>
+                <li class="nav-item admin-only">
+                    <a class="nav-link" href="#" data-target="reports-view">
+                        <i class="bi bi-bar-chart-line-fill"></i> <span>Reports & Analytics</span>
+                    </a>
+                </li>
+
+                <!-- Department Links -->
+                <li class="nav-item dept-only d-none">
+                    <a class="nav-link" href="#" data-target="dept-dashboard">
+                        <i class="bi bi-grid-1x2-fill"></i> <span>Department Overview</span>
+                    </a>
+                </li>
+                <li class="nav-item dept-only d-none">
+                    <a class="nav-link" href="#" data-target="dept-request">
+                        <i class="bi bi-calendar-plus-fill"></i> <span>Submit Request</span>
+                    </a>
+                </li>
+                <li class="nav-item dept-only d-none">
+                    <a class="nav-link" href="#" data-target="dept-bookings">
+                        <i class="bi bi-clock-history"></i> <span>My Request History</span>
+                    </a>
+                </li>
+                <li class="nav-item dept-only d-none">
+                    <a class="nav-link" href="#" data-target="calendar-view">
+                        <i class="bi bi-calendar3"></i> <span>Availability Calendar</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <small class="text-white-50 d-block text-center fs-8">ASP.NET Core MVC & EF Core Engine</small>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <button class="btn btn-icon me-3 d-md-none" id="sidebarToggle"><i class="bi bi-list fs-4"></i></button>
+                <div class="topbar-title">
+                    <h4 class="mb-0 font-weight-700" id="pageTitle">Admin Dashboard</h4>
+                </div>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span class="text-muted fs-7"><i class="bi bi-calendar-event me-1"></i> <span id="liveClock"></span></span>
+                </div>
+            </header>
+
+            <div class="content-container">
+                <div id="toastAlert" class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4 d-none">
+                    <i class="bi bi-check-circle-fill me-2 fs-5"></i><span id="toastMsg">Action completed successfully!</span>
+                    <button type="button" class="btn-close" onclick="hideToast()"></button>
+                </div>
+
+                <!-- 1. ADMIN DASHBOARD VIEW -->
+                <div id="admin-dashboard" class="view-section active">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted font-weight-700 text-uppercase">Total Halls</small>
+                                        <h2 class="font-weight-800 text-dark mb-0 mt-1" id="statHalls">4</h2>
+                                    </div>
+                                    <div class="p-3 bg-primary-subtle text-primary rounded-4 fs-3"><i class="bi bi-building"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted font-weight-700 text-uppercase">Pending Requests</small>
+                                        <h2 class="font-weight-800 text-warning mb-0 mt-1" id="statPending">2</h2>
+                                    </div>
+                                    <div class="p-3 bg-warning-subtle text-warning rounded-4 fs-3"><i class="bi bi-hourglass-split"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted font-weight-700 text-uppercase">Approved Bookings</small>
+                                        <h2 class="font-weight-800 text-success mb-0 mt-1" id="statApproved">1</h2>
+                                    </div>
+                                    <div class="p-3 bg-success-subtle text-success rounded-4 fs-3"><i class="bi bi-calendar-check"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted font-weight-700 text-uppercase">Departments</small>
+                                        <h2 class="font-weight-800 text-info mb-0 mt-1" id="statDepts">4</h2>
+                                    </div>
+                                    <div class="p-3 bg-info-subtle text-info rounded-4 fs-3"><i class="bi bi-diagram-3"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+                        <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between">
+                            <h5 class="font-weight-700 mb-0">Pending Requests Needing Action</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Venue</th>
+                                            <th>Dept</th>
+                                            <th>Date & Slot</th>
+                                            <th>Purpose</th>
+                                            <th>Pax</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminPendingTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. ADMIN HALLS MANAGEMENT VIEW -->
+                <div id="admin-halls" class="view-section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="font-weight-700 mb-0">College Halls & Auditoriums</h4>
+                        <button class="btn btn-primary font-weight-600" data-bs-toggle="modal" data-bs-target="#addHallModal">
+                            <i class="bi bi-plus-lg me-1"></i> Add New Hall
+                        </button>
+                    </div>
+                    <div class="row g-4" id="hallsGrid"></div>
+                </div>
+
+                <!-- 3. ADMIN DEPARTMENTS VIEW -->
+                <div id="admin-depts" class="view-section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="font-weight-700 mb-0">Department Accounts & Credentials</h4>
+                        <button class="btn btn-primary font-weight-600" data-bs-toggle="modal" data-bs-target="#addDeptModal">
+                            <i class="bi bi-person-plus me-1"></i> Add Department Account
+                        </button>
+                    </div>
+                    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Department Name</th>
+                                        <th>Head of Department</th>
+                                        <th>Contact Email</th>
+                                        <th>Phone</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deptsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. PENDING REQUESTS VIEW -->
+                <div id="admin-requests" class="view-section">
+                    <h4 class="font-weight-700 mb-4">All Booking Requests</h4>
+                    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ref</th>
+                                        <th>Hall</th>
+                                        <th>Department</th>
+                                        <th>Date & Slot</th>
+                                        <th>Purpose</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allRequestsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. DEPARTMENT SUBMIT REQUEST VIEW -->
+                <div id="dept-request" class="view-section">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                                <h4 class="font-weight-700 mb-3"><i class="bi bi-calendar-plus text-primary me-2"></i>Submit Hall Booking Request</h4>
+                                <form id="bookingForm">
+                                    <div class="mb-3">
+                                        <label class="form-label font-weight-600">Target Venue</label>
+                                        <select id="requestHallId" class="form-select bg-light" required></select>
+                                    </div>
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label font-weight-600">Booking Date</label>
+                                            <input type="date" id="requestDate" class="form-control bg-light" required />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label font-weight-600">Start Time</label>
+                                            <input type="time" id="requestStart" class="form-control bg-light" value="09:00" required />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label font-weight-600">End Time</label>
+                                            <input type="time" id="requestEnd" class="form-control bg-light" value="12:00" required />
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label font-weight-600">Event Purpose / Title</label>
+                                        <input type="text" id="requestPurpose" class="form-control bg-light" placeholder="e.g. AI & Robotics National Seminar" required />
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label font-weight-600">Expected Participants</label>
+                                        <input type="number" id="requestPax" class="form-control bg-light" placeholder="150" required />
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 py-2.5 font-weight-700 rounded-3">
+                                        <i class="bi bi-send me-1"></i> Submit Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. DEPARTMENT DASHBOARD / MY BOOKINGS VIEW -->
+                <div id="dept-dashboard" class="view-section">
+                    <div class="card border-0 shadow-sm rounded-4 bg-gradient-primary text-white p-5 mb-4">
+                        <h2 class="font-weight-800 mb-1">Welcome, Department User!</h2>
+                        <p class="text-white-50">Manage venue requests and track reservation statuses in real-time.</p>
+                    </div>
+                </div>
+
+                <div id="dept-bookings" class="view-section">
+                    <h4 class="font-weight-700 mb-4">Department Request History</h4>
+                    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Venue</th>
+                                        <th>Date & Slot</th>
+                                        <th>Purpose</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deptHistoryTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. CALENDAR VIEW -->
+                <div id="calendar-view" class="view-section">
+                    <h4 class="font-weight-700 mb-4">Hall Reservation Calendar</h4>
+                    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                        <div id="calendar" style="min-height: 550px;"></div>
+                    </div>
+                </div>
+
+                <!-- 8. REPORTS VIEW -->
+                <div id="reports-view" class="view-section">
+                    <h4 class="font-weight-700 mb-4">Reservation Reports & Analytics</h4>
+                    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                        <p class="text-muted">Filtered summary reports across halls and status</p>
+                        <div class="table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Hall</th>
+                                        <th>Department</th>
+                                        <th>Purpose</th>
+                                        <th>Time Slot</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Hall Modal -->
+    <div class="modal fade" id="addHallModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title font-weight-700">Add New College Hall</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addHallForm">
+                    <div class="modal-body">
+                        <div class="mb-3"><label class="form-label">Hall Name</label><input type="text" id="hallName" class="form-control" required /></div>
+                        <div class="mb-3"><label class="form-label">Location</label><input type="text" id="hallLoc" class="form-control" required /></div>
+                        <div class="mb-3"><label class="form-label">Capacity (Seats)</label><input type="number" id="hallCap" class="form-control" required /></div>
+                        <div class="mb-3"><label class="form-label">Facilities</label><input type="text" id="hallFac" class="form-control" placeholder="Projector, AC, Audio" /></div>
+                        <div class="mb-3"><label class="form-label">Description</label><textarea id="hallDesc" class="form-control" rows="2"></textarea></div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="btn btn-primary font-weight-600">Save Hall</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Dept Modal -->
+    <div class="modal fade" id="addDeptModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title font-weight-700">Register Department</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addDeptForm">
+                    <div class="modal-body">
+                        <div class="mb-3"><label class="form-label">Dept Code</label><input type="text" id="deptCode" class="form-control" placeholder="e.g. IT" required /></div>
+                        <div class="mb-3"><label class="form-label">Dept Name</label><input type="text" id="deptName" class="form-control" placeholder="Information Technology" required /></div>
+                        <div class="mb-3"><label class="form-label">Contact Email</label><input type="email" id="deptEmail" class="form-control" required /></div>
+                        <div class="mb-3"><label class="form-label">Phone</label><input type="text" id="deptPhone" class="form-control" /></div>
+                        <div class="mb-3"><label class="form-label">Head of Dept</label><input type="text" id="deptHead" class="form-control" /></div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="btn btn-primary font-weight-600">Generate Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script>
+        let fullCalendarObj = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("liveClock").innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            
+            // Set default date for booking form
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById("requestDate").value = tomorrow.toISOString().split('T')[0];
+
+            loadData();
+
+            // Navigation handler
+            document.querySelectorAll(".nav-link").forEach(link => {
+                link.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+                    this.classList.add("active");
+                    const target = this.getAttribute("data-target");
+                    showView(target);
+                });
+            });
+
+            // Role Switcher
+            document.getElementById("roleSwitcher").addEventListener("change", function() {
+                const role = this.value;
+                if (role === 'admin') {
+                    document.getElementById("currentUserName").innerText = "Admin User";
+                    document.getElementById("currentUserRole").innerText = "System Admin";
+                    document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("d-none"));
+                    document.querySelectorAll(".dept-only").forEach(el => el.classList.add("d-none"));
+                    document.querySelector('.nav-link[data-target="admin-dashboard"]').click();
+                } else {
+                    document.getElementById("currentUserName").innerText = "CSE Dept Head";
+                    document.getElementById("currentUserRole").innerText = "Department User";
+                    document.querySelectorAll(".admin-only").forEach(el => el.classList.add("d-none"));
+                    document.querySelectorAll(".dept-only").forEach(el => el.classList.remove("d-none"));
+                    document.querySelector('.nav-link[data-target="dept-dashboard"]').click();
+                }
+            });
+
+            // Forms
+            document.getElementById("bookingForm").addEventListener("submit", async function(e) {
+                e.preventDefault();
+                const data = {
+                    hallId: document.getElementById("requestHallId").value,
+                    deptId: 1, // CSE
+                    bookingDate: document.getElementById("requestDate").value,
+                    startTime: document.getElementById("requestStart").value,
+                    endTime: document.getElementById("requestEnd").value,
+                    purpose: document.getElementById("requestPurpose").value,
+                    expectedParticipants: document.getElementById("requestPax").value
+                };
+
+                const res = await fetch('/api/bookings/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    showToast(result.message);
+                    loadData();
+                    document.querySelector('.nav-link[data-target="dept-bookings"]').click();
+                } else {
+                    alert("Error: " + result.message);
+                }
+            });
+
+            document.getElementById("addHallForm").addEventListener("submit", async function(e) {
+                e.preventDefault();
+                const data = {
+                    name: document.getElementById("hallName").value,
+                    location: document.getElementById("hallLoc").value,
+                    capacity: document.getElementById("hallCap").value,
+                    facilities: document.getElementById("hallFac").value,
+                    description: document.getElementById("hallDesc").value
+                };
+                const res = await fetch('/api/halls/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById("addHallModal")).hide();
+                    showToast("New hall created successfully!");
+                    loadData();
+                }
+            });
+
+            document.getElementById("addDeptForm").addEventListener("submit", async function(e) {
+                e.preventDefault();
+                const data = {
+                    code: document.getElementById("deptCode").value,
+                    name: document.getElementById("deptName").value,
+                    email: document.getElementById("deptEmail").value,
+                    phone: document.getElementById("deptPhone").value,
+                    head: document.getElementById("deptHead").value
+                };
+                const res = await fetch('/api/departments/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById("addDeptModal")).hide();
+                    showToast("Department account & credentials created successfully!");
+                    loadData();
+                }
+            });
+        });
+
+        function showView(viewId) {
+            document.querySelectorAll(".view-section").forEach(v => v.classList.remove("active"));
+            const targetEl = document.getElementById(viewId);
+            if (targetEl) targetEl.classList.add("active");
+            
+            const titles = {
+                'admin-dashboard': 'Admin Dashboard Overview',
+                'admin-halls': 'College Halls Management',
+                'admin-depts': 'Department Accounts & Credentials',
+                'admin-requests': 'Booking Applications Approval',
+                'dept-dashboard': 'Department Portal',
+                'dept-request': 'Submit Hall Booking Request',
+                'dept-bookings': 'My Booking Requests History',
+                'calendar-view': 'Interactive Availability Calendar',
+                'reports-view': 'Reservation Reports & Analytics'
+            };
+            document.getElementById("pageTitle").innerText = titles[viewId] || 'Dashboard';
+
+            if (viewId === 'calendar-view') {
+                initCalendar();
+            }
+        }
+
+        async function loadData() {
+            const [hallsRes, deptsRes, bookingsRes] = await Promise.all([
+                fetch('/api/halls'),
+                fetch('/api/departments'),
+                fetch('/api/bookings')
+            ]);
+            const halls = await hallsRes.json();
+            const depts = await deptsRes.json();
+            const bookings = await bookingsRes.json();
+
+            // Stats
+            document.getElementById("statHalls").innerText = halls.length;
+            document.getElementById("statPending").innerText = bookings.filter(b => b.status === 'Pending').length;
+            document.getElementById("statApproved").innerText = bookings.filter(b => b.status === 'Approved').length;
+            document.getElementById("statDepts").innerText = depts.length;
+
+            // Render Halls Grid
+            const hallsGrid = document.getElementById("hallsGrid");
+            hallsGrid.innerHTML = halls.map(h => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card hall-card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100">
+                        <img src="${h.imagePath}" class="hall-img" alt="${h.name}">
+                        <div class="card-body p-4">
+                            <h5 class="font-weight-700 mb-1">${h.name}</h5>
+                            <p class="text-muted fs-7 mb-2"><i class="bi bi-geo-alt text-danger me-1"></i>${h.location}</p>
+                            <span class="badge bg-primary-subtle text-primary mb-3">Capacity: ${h.capacity} seats</span>
+                            <p class="text-secondary fs-7 mb-3">${h.description}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Fill Select Option in Booking Form
+            const select = document.getElementById("requestHallId");
+            select.innerHTML = halls.map(h => `<option value="${h.id}">${h.name} (${h.capacity} Seats)</option>`).join('');
+
+            // Render Admin Pending Table
+            const pending = bookings.filter(b => b.status === 'Pending');
+            document.getElementById("adminPendingTable").innerHTML = pending.length === 0 
+                ? `<tr><td colspan="6" class="text-center py-4 text-muted">No pending requests!</td></tr>`
+                : pending.map(b => `
+                <tr>
+                    <td><strong>${b.hallName}</strong></td>
+                    <td><span class="badge bg-secondary-subtle text-dark">${b.deptCode}</span></td>
+                    <td>${b.bookingDate}<br><small class="text-muted">${b.startTime} - ${b.endTime}</small></td>
+                    <td>${b.purpose}</td>
+                    <td><span class="badge bg-info-subtle text-info">${b.expectedParticipants}</span></td>
+                    <td class="text-end">
+                        <button onclick="approveBooking(${b.id})" class="btn btn-success btn-sm font-weight-600">Approve</button>
+                        <button onclick="rejectBooking(${b.id})" class="btn btn-outline-danger btn-sm font-weight-600 ms-1">Reject</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Render All Requests & Department History
+            document.getElementById("allRequestsTable").innerHTML = bookings.map(b => `
+                <tr>
+                    <td>#${b.id}</td>
+                    <td><strong>${b.hallName}</strong></td>
+                    <td>${b.deptName}</td>
+                    <td>${b.bookingDate} (${b.startTime}-${b.endTime})</td>
+                    <td>${b.purpose}</td>
+                    <td><span class="badge ${b.status==='Approved'?'bg-success-subtle text-success':'bg-warning-subtle text-warning'}">${b.status}</span></td>
+                    <td><small>${b.adminRemarks||'-'}</small></td>
+                </tr>
+            `).join('');
+
+            document.getElementById("deptHistoryTable").innerHTML = bookings.filter(b => b.deptCode === 'CSE').map(b => `
+                <tr>
+                    <td><strong>${b.hallName}</strong></td>
+                    <td>${b.bookingDate} (${b.startTime}-${b.endTime})</td>
+                    <td>${b.purpose}</td>
+                    <td><span class="badge ${b.status==='Approved'?'bg-success-subtle text-success':'bg-warning-subtle text-warning'}">${b.status}</span></td>
+                    <td><small>${b.adminRemarks||'-'}</small></td>
+                </tr>
+            `).join('');
+
+            // Render Depts Table
+            document.getElementById("deptsTable").innerHTML = depts.map(d => `
+                <tr>
+                    <td><span class="badge bg-primary-subtle text-primary font-weight-700">${d.code}</span></td>
+                    <td><strong>${d.name}</strong></td>
+                    <td>${d.head}</td>
+                    <td>${d.email}</td>
+                    <td>${d.phone}</td>
+                </tr>
+            `).join('');
+
+            // Reports Table
+            document.getElementById("reportsTable").innerHTML = bookings.map(b => `
+                <tr>
+                    <td>${b.bookingDate}</td>
+                    <td><strong>${b.hallName}</strong></td>
+                    <td>${b.deptName}</td>
+                    <td>${b.purpose}</td>
+                    <td>${b.startTime} - ${b.endTime}</td>
+                    <td><span class="badge ${b.status==='Approved'?'bg-success-subtle text-success':'bg-warning-subtle text-warning'}">${b.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        async function approveBooking(id) {
+            const remarks = prompt("Enter approval remarks (optional):", "Approved by Admin");
+            if (remarks !== null) {
+                const res = await fetch('/api/bookings/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, remarks })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    showToast(result.message);
+                    loadData();
+                } else {
+                    alert("Error: " + result.message);
+                }
+            }
+        }
+
+        async function rejectBooking(id) {
+            const remarks = prompt("Enter rejection reason:", "Conflicting event or maintenance");
+            if (remarks) {
+                const res = await fetch('/api/bookings/reject', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, remarks })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    showToast(result.message);
+                    loadData();
+                }
+            }
+        }
+
+        function initCalendar() {
+            if (!fullCalendarObj) {
+                const calendarEl = document.getElementById('calendar');
+                fullCalendarObj = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                    events: '/api/Calendar/events'
+                });
+                fullCalendarObj.render();
+            } else {
+                fullCalendarObj.refetchEvents();
+            }
+        }
+
+        function showToast(msg) {
+            document.getElementById("toastMsg").innerText = msg;
+            document.getElementById("toastAlert").classList.remove("d-none");
+            setTimeout(hideToast, 4000);
+        }
+
+        function hideToast() {
+            document.getElementById("toastAlert").classList.add("d-none");
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+@model CollegeHallBooking.Models.BookingStatus
+
+@switch (Model)
+{
+    case BookingStatus.Pending:
+        <span class="badge bg-warning-subtle text-warning border border-warning px-2.5 py-1.5 rounded-pill font-weight-600 fs-7">
+            <i class="bi bi-clock-history me-1"></i> Pending Approval
+        </span>
+        break;
+    case BookingStatus.Approved:
+        <span class="badge bg-success-subtle text-success border border-success px-2.5 py-1.5 rounded-pill font-weight-600 fs-7">
+            <i class="bi bi-check-circle-fill me-1"></i> Approved
+        </span>
+        break;
+    case BookingStatus.Rejected:
+        <span class="badge bg-danger-subtle text-danger border border-danger px-2.5 py-1.5 rounded-pill font-weight-600 fs-7">
+            <i class="bi bi-x-circle-fill me-1"></i> Rejected
+        </span>
+        break;
+    case BookingStatus.Cancelled:
+        <span class="badge bg-secondary-subtle text-secondary border border-secondary px-2.5 py-1.5 rounded-pill font-weight-600 fs-7">
+            <i class="bi bi-slash-circle me-1"></i> Cancelled
+        </span>
+        break;
+}

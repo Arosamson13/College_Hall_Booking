@@ -1,0 +1,106 @@
+@model CollegeHallBooking.ViewModels.BookingFilterViewModel
+@{
+    ViewData["Title"] = "Reports & Analytics";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="font-weight-700 mb-1">Hall Reservation Reports</h3>
+        <p class="text-muted mb-0">Generate statistics based on halls, departments, dates, and status</p>
+    </div>
+    <button onclick="window.print()" class="btn btn-outline-secondary font-weight-600">
+        <i class="bi bi-printer me-1"></i> Print Report
+    </button>
+</div>
+
+<!-- Date & Filter Controls -->
+<div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+    <div class="card-body p-4">
+        <form method="get" asp-action="Reports" class="row g-3 align-items-end">
+            <div class="col-12 col-md-3">
+                <label class="form-label font-weight-600 fs-7">From Date</label>
+                <input asp-for="StartDate" type="date" class="form-control bg-light" />
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label font-weight-600 fs-7">To Date</label>
+                <input asp-for="EndDate" type="date" class="form-control bg-light" />
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label font-weight-600 fs-7">Filter Hall</label>
+                <select asp-for="HallId" class="form-select bg-light">
+                    <option value="">-- All Halls --</option>
+                    @foreach (var h in Model.Halls)
+                    {
+                        <option value="@h.Id">@h.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <button type="submit" class="btn btn-primary w-100 font-weight-600"><i class="bi bi-bar-chart me-1"></i> Generate Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="p-3 bg-white rounded-4 shadow-sm border text-center">
+            <span class="text-muted fs-7 font-weight-700 text-uppercase d-block mb-1">Total Requests</span>
+            <span class="fs-2 font-weight-800 text-dark">@Model.Bookings.Count</span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="p-3 bg-white rounded-4 shadow-sm border text-center">
+            <span class="text-muted fs-7 font-weight-700 text-uppercase d-block mb-1">Approved Bookings</span>
+            <span class="fs-2 font-weight-800 text-success">@Model.Bookings.Count(b => b.Status == BookingStatus.Approved)</span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="p-3 bg-white rounded-4 shadow-sm border text-center">
+            <span class="text-muted fs-7 font-weight-700 text-uppercase d-block mb-1">Pending Approval</span>
+            <span class="fs-2 font-weight-800 text-warning">@Model.Bookings.Count(b => b.Status == BookingStatus.Pending)</span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="p-3 bg-white rounded-4 shadow-sm border text-center">
+            <span class="text-muted fs-7 font-weight-700 text-uppercase d-block mb-1">Rejected / Cancelled</span>
+            <span class="fs-2 font-weight-800 text-danger">@Model.Bookings.Count(b => b.Status == BookingStatus.Rejected || b.Status == BookingStatus.Cancelled)</span>
+        </div>
+    </div>
+</div>
+
+<!-- Report Table -->
+<div class="card border-0 shadow-sm rounded-4 bg-white">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Hall</th>
+                        <th>Department</th>
+                        <th>Event Purpose</th>
+                        <th>Time Slot</th>
+                        <th>Participants</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.Bookings)
+                    {
+                        <tr>
+                            <td>@b.BookingDate.ToString("yyyy-MM-dd")</td>
+                            <td><strong>@b.Hall?.Name</strong></td>
+                            <td>@b.Department?.DepartmentName (@b.Department?.DepartmentCode)</td>
+                            <td>@b.Purpose</td>
+                            <td>@b.StartTime.ToString(@"hh\:mm") - @b.EndTime.ToString(@"hh\:mm")</td>
+                            <td>@b.ExpectedParticipants</td>
+                            <td>@await Html.PartialAsync("_StatusBadge", b.Status)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

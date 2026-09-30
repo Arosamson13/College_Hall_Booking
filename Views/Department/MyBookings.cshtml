@@ -1,0 +1,92 @@
+@model IEnumerable<CollegeHallBooking.Models.Booking>
+@{
+    ViewData["Title"] = "My Booking Requests & Status";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="font-weight-700 mb-1">Booking Application History</h3>
+        <p class="text-muted mb-0">Track live approval status, admin remarks, and upcoming reservations</p>
+    </div>
+    <a asp-action="BookRequest" class="btn btn-primary font-weight-600 px-3 py-2 rounded-3 shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> New Request
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 bg-white">
+    <div class="card-body p-4">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-clock-history fs-1 mb-2 d-block text-secondary"></i>
+                <p>No booking requests submitted yet.</p>
+                <a asp-action="BookRequest" class="btn btn-outline-primary font-weight-600">Submit Booking Request</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ref #</th>
+                            <th>Hall Name</th>
+                            <th>Event Purpose</th>
+                            <th>Reservation Date</th>
+                            <th>Time Slot</th>
+                            <th>Participants</th>
+                            <th>Status</th>
+                            <th>Admin Remarks</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model)
+                        {
+                            <tr>
+                                <td><span class="font-weight-700 text-secondary">#@b.Id</span></td>
+                                <td>
+                                    <strong class="text-dark d-block">@b.Hall?.Name</strong>
+                                    <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>@b.Hall?.Location</small>
+                                </td>
+                                <td>
+                                    <span class="font-weight-600 text-dark">@b.Purpose</span>
+                                </td>
+                                <td>
+                                    <span class="font-weight-700 text-dark">@b.BookingDate.ToString("ddd, dd MMM yyyy")</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border"><i class="bi bi-clock me-1"></i>@b.StartTime.ToString(@"hh\:mm") - @b.EndTime.ToString(@"hh\:mm")</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info-subtle text-info font-weight-600"><i class="bi bi-people me-1"></i>@b.ExpectedParticipants</span>
+                                </td>
+                                <td>
+                                    @await Html.PartialAsync("_StatusBadge", b.Status)
+                                </td>
+                                <td>
+                                    <small class="text-muted font-italic">@(string.IsNullOrEmpty(b.AdminRemarks) ? "No remarks yet" : b.AdminRemarks)</small>
+                                </td>
+                                <td class="text-end">
+                                    @if (b.Status == BookingStatus.Pending)
+                                    {
+                                        <form asp-action="CancelBooking" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@b.Id" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm font-weight-600" onclick="return confirm('Are you sure you want to cancel this pending booking request?');">
+                                                <i class="bi bi-trash me-1"></i> Cancel Request
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fs-7"><i class="bi bi-check-all"></i> Complete</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

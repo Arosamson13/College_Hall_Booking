@@ -1,0 +1,156 @@
+@model CollegeHallBooking.ViewModels.DepartmentDashboardViewModel
+@{
+    ViewData["Title"] = "Department Portal";
+}
+
+<!-- Welcome Banner -->
+<div class="card border-0 shadow-sm rounded-4 bg-gradient-primary text-white mb-4 overflow-hidden">
+    <div class="card-body p-4 p-md-5 d-flex justify-content-between align-items-center">
+        <div>
+            <span class="badge bg-white text-primary font-weight-700 mb-2">Department Module</span>
+            <h2 class="display-6 font-weight-800 mb-1">Welcome, @Model.DepartmentName!</h2>
+            <p class="text-white-50 mb-4" style="max-width: 600px;">Reserve college halls for seminars, cultural programs, tech fests, and workshops effortlessly.</p>
+            <a asp-action="BookRequest" class="btn btn-accent btn-lg font-weight-700 px-4 py-2.5 rounded-3 shadow">
+                <i class="bi bi-calendar-plus-fill me-2"></i> Submit New Booking Request
+            </a>
+        </div>
+        <div class="d-none d-lg-block opacity-25 me-4">
+            <i class="bi bi-building-add display-1"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fs-7 font-weight-700 text-uppercase">Total Requests</span>
+                    <h3 class="font-weight-800 text-dark mb-0 mt-1">@Model.MyTotalBookings</h3>
+                </div>
+                <div class="p-3 bg-light rounded-4 text-primary fs-3"><i class="bi bi-folder-check"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fs-7 font-weight-700 text-uppercase">Pending Approval</span>
+                    <h3 class="font-weight-800 text-warning mb-0 mt-1">@Model.MyPendingBookings</h3>
+                </div>
+                <div class="p-3 bg-warning-subtle text-warning rounded-4 fs-3"><i class="bi bi-clock-history"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fs-7 font-weight-700 text-uppercase">Approved Bookings</span>
+                    <h3 class="font-weight-800 text-success mb-0 mt-1">@Model.MyApprovedBookings</h3>
+                </div>
+                <div class="p-3 bg-success-subtle text-success rounded-4 fs-3"><i class="bi bi-check-circle-fill"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 bg-white">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted fs-7 font-weight-700 text-uppercase">Rejected</span>
+                    <h3 class="font-weight-800 text-danger mb-0 mt-1">@Model.MyRejectedBookings</h3>
+                </div>
+                <div class="p-3 bg-danger-subtle text-danger rounded-4 fs-3"><i class="bi bi-x-circle"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Requests -->
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 bg-white h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="font-weight-700 mb-0">Recent Booking Requests</h5>
+                <a asp-action="MyBookings" class="btn btn-light btn-sm font-weight-600">View All History</a>
+            </div>
+            <div class="card-body p-4">
+                @if (!Model.MyRecentBookings.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x fs-1 mb-2 d-block text-secondary"></i>
+                        <p>You haven't submitted any hall booking requests yet.</p>
+                        <a asp-action="BookRequest" class="btn btn-outline-primary btn-sm font-weight-600">Request First Hall Booking</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Hall</th>
+                                    <th>Date & Slot</th>
+                                    <th>Purpose</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in Model.MyRecentBookings)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong class="text-dark d-block">@b.Hall?.Name</strong>
+                                            <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>@b.Hall?.Location</small>
+                                        </td>
+                                        <td>
+                                            <span class="d-block font-weight-600">@b.BookingDate.ToString("dd MMM yyyy")</span>
+                                            <small class="text-muted">@b.StartTime.ToString(@"hh\:mm") - @b.EndTime.ToString(@"hh\:mm")</small>
+                                        </td>
+                                        <td>
+                                            <span class="text-truncate d-inline-block" style="max-width: 150px;">@b.Purpose</span>
+                                        </td>
+                                        <td>
+                                            @await Html.PartialAsync("_StatusBadge", b.Status)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Halls Preview -->
+    <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 bg-white h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="font-weight-700 mb-0">College Venues</h5>
+                <a asp-action="Halls" class="btn btn-light btn-sm font-weight-600">View Details</a>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var hall in Model.AvailableHalls.Take(4))
+                    {
+                        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar-md bg-white border rounded-3 d-flex align-items-center justify-content-center text-primary fs-4" style="width: 48px; height: 48px;">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <div>
+                                    <h6 class="font-weight-700 mb-0 text-dark">@hall.Name</h6>
+                                    <small class="text-muted"><i class="bi bi-people me-1"></i>Capacity: @hall.Capacity seats</small>
+                                </div>
+                            </div>
+                            <a asp-action="BookRequest" asp-route-hallId="@hall.Id" class="btn btn-sm btn-primary font-weight-600">Book</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

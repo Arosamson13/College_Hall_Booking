@@ -1,0 +1,92 @@
+@model CollegeHallBooking.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<div class="login-container">
+    <div class="card login-card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="row g-0">
+            <div class="col-lg-6 login-banner d-none d-lg-flex flex-column justify-content-between p-5 text-white">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <div class="logo-icon bg-white text-primary rounded-3 p-2">
+                            <i class="bi bi-building-fill-check fs-4"></i>
+                        </div>
+                        <h4 class="mb-0 font-weight-700">UniHall</h4>
+                    </div>
+                    <h2 class="display-6 font-weight-800 mb-3">College Hall Booking Portal</h2>
+                    <p class="lead text-white-50">Streamlined hall reservations, automated clash-free scheduling, and transparent approval workflows for all academic departments.</p>
+                </div>
+                <div class="features-list">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-shield-check fs-4 text-accent me-3"></i>
+                        <span>Role-based secure access for Admin & Departments</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-clock-history fs-4 text-accent me-3"></i>
+                        <span>Real-time time overlap prevention engine</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-calendar3 fs-4 text-accent me-3"></i>
+                        <span>Interactive calendar visualization & reports</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 p-4 p-md-5 bg-white">
+                <div class="text-center mb-4">
+                    <h3 class="font-weight-700 text-dark">Welcome Back</h3>
+                    <p class="text-muted">Sign in to manage halls or submit booking requests</p>
+                </div>
+
+                <form asp-action="Login" method="post" id="loginForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="ReturnUrl" />
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label font-weight-600">Email Address / User ID</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                            <input asp-for="Email" class="form-control border-start-0 bg-light" placeholder="e.g. admin@college.edu or cse@college.edu" autocomplete="username" />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label font-weight-600">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                            <input asp-for="Password" class="form-control border-start-0 bg-light" placeholder="Enter your password" autocomplete="current-password" />
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="RememberMe" id="rememberMe">
+                            <label class="form-check-label text-muted fs-7" for="rememberMe">Remember me</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2.5 font-weight-600 rounded-3 shadow-sm mb-4">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Sign In to Portal
+                    </button>
+                </form>
+
+                <div class="demo-credentials bg-light p-3 rounded-3 border">
+                    <h6 class="font-weight-700 text-secondary mb-2 fs-7 text-uppercase"><i class="bi bi-info-circle-fill me-1"></i> Quick Demo Accounts</h6>
+                    <div class="row g-2 fs-7">
+                        <div class="col-6">
+                            <span class="d-block text-muted"><strong>Admin:</strong> admin@college.edu</span>
+                            <span class="d-block text-muted"><strong>Pass:</strong> Admin@Password123</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="d-block text-muted"><strong>Dept (CSE):</strong> cse@college.edu</span>
+                            <span class="d-block text-muted"><strong>Pass:</strong> Dept@123456</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

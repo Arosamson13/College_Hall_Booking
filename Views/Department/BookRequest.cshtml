@@ -1,0 +1,124 @@
+@model CollegeHallBooking.ViewModels.BookingRequestViewModel
+@{
+    ViewData["Title"] = "Hall Booking Request";
+    var hallsList = ViewBag.HallsList as IEnumerable<CollegeHallBooking.Models.Hall> ?? new List<CollegeHallBooking.Models.Hall>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm rounded-4 bg-white">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <h4 class="font-weight-700 mb-0"><i class="bi bi-calendar-plus text-primary me-2"></i>New Hall Reservation Request</h4>
+                <p class="text-muted fs-7 mb-0">Submit hall details, date, time slots, and expected audience count for approval</p>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="BookRequest" method="post" id="bookingRequestForm">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-3 mb-3"></div>
+
+                    <!-- Selected Hall Preview Banner -->
+                    <div class="mb-4">
+                        <label asp-for="HallId" class="form-label font-weight-600 fs-6">1. Select Target Venue</label>
+                        <select asp-for="HallId" class="form-select form-select-lg bg-light" id="hallSelect" required>
+                            <option value="">-- Choose a College Hall --</option>
+                            @foreach (var h in hallsList)
+                            {
+                                <option value="@h.Id" data-capacity="@h.Capacity" data-location="@h.Location">@h.Name (Capacity: @h.Capacity seats, Location: @h.Location)</option>
+                            }
+                        </select>
+                        <span asp-validation-for="HallId" class="text-danger fs-7"></span>
+                    </div>
+
+                    <!-- Date & Time Slot Selection -->
+                    <div class="card border bg-light rounded-3 p-3 mb-4">
+                        <h6 class="font-weight-700 text-dark mb-3"><i class="bi bi-clock-history text-primary me-1"></i>2. Schedule Date & Time Slot</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="BookingDate" class="form-label font-weight-600"></label>
+                                <input asp-for="BookingDate" type="date" class="form-control bg-white" min="@DateTime.Today.ToString("yyyy-MM-dd")" id="bookingDateInput" required />
+                                <span asp-validation-for="BookingDate" class="text-danger fs-7"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="StartTime" class="form-label font-weight-600"></label>
+                                <input asp-for="StartTime" type="time" class="form-control bg-white" id="startTimeInput" required />
+                                <span asp-validation-for="StartTime" class="text-danger fs-7"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="EndTime" class="form-label font-weight-600"></label>
+                                <input asp-for="EndTime" type="time" class="form-control bg-white" id="endTimeInput" required />
+                                <span asp-validation-for="EndTime" class="text-danger fs-7"></span>
+                            </div>
+                        </div>
+                        <div id="overlapWarning" class="alert alert-warning border-0 rounded-3 mt-3 mb-0 d-none">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Slot Validation:</strong> Please verify start and end times. End time must be after start time.
+                        </div>
+                    </div>
+
+                    <!-- Event Details -->
+                    <div class="card border bg-light rounded-3 p-3 mb-4">
+                        <h6 class="font-weight-700 text-dark mb-3"><i class="bi bi-file-text text-primary me-1"></i>3. Event & Audience Information</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <label asp-for="Purpose" class="form-label font-weight-600"></label>
+                                <input asp-for="Purpose" class="form-control bg-white" placeholder="e.g. Annual Tech Symposium 2026 Keynote Session" required />
+                                <span asp-validation-for="Purpose" class="text-danger fs-7"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="ExpectedParticipants" class="form-label font-weight-600"></label>
+                                <input asp-for="ExpectedParticipants" type="number" class="form-control bg-white" placeholder="e.g. 200" id="participantsInput" required />
+                                <span asp-validation-for="ExpectedParticipants" class="text-danger fs-7"></span>
+                                <small id="capacityHint" class="text-muted fs-8"></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Dashboard" class="btn btn-light px-4 font-weight-600">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-5 py-2.5 font-weight-700 rounded-3 shadow">
+                            <i class="bi bi-send-fill me-1"></i> Submit Booking Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const hallSelect = document.getElementById("hallSelect");
+            const capacityHint = document.getElementById("capacityHint");
+            const participantsInput = document.getElementById("participantsInput");
+            const startTimeInput = document.getElementById("startTimeInput");
+            const endTimeInput = document.getElementById("endTimeInput");
+            const overlapWarning = document.getElementById("overlapWarning");
+
+            function updateCapacityHint() {
+                const selectedOpt = hallSelect.options[hallSelect.selectedIndex];
+                if (selectedOpt && selectedOpt.dataset.capacity) {
+                    const cap = parseInt(selectedOpt.dataset.capacity);
+                    capacityHint.innerHTML = `<i class="bi bi-info-circle me-1"></i>Max venue capacity: <strong>${cap}</strong> seats.`;
+                    participantsInput.max = cap;
+                } else {
+                    capacityHint.innerHTML = "";
+                }
+            }
+
+            function validateTimes() {
+                if (startTimeInput.value && endTimeInput.value) {
+                    if (startTimeInput.value >= endTimeInput.value) {
+                        overlapWarning.classList.remove("d-none");
+                    } else {
+                        overlapWarning.classList.add("d-none");
+                    }
+                }
+            }
+
+            hallSelect.addEventListener("change", updateCapacityHint);
+            startTimeInput.addEventListener("change", validateTimes);
+            endTimeInput.addEventListener("change", validateTimes);
+
+            updateCapacityHint();
+        });
+    </script>
+}

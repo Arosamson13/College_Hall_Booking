@@ -1,0 +1,87 @@
+@model IEnumerable<CollegeHallBooking.Models.Hall>
+@{
+    ViewData["Title"] = "College Halls Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="font-weight-700 mb-1">College Halls & Auditoriums</h3>
+        <p class="text-muted mb-0">Add, edit, deactivate, or manage college venues</p>
+    </div>
+    <a asp-action="CreateHall" class="btn btn-primary font-weight-600 px-3 py-2 rounded-3 shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Add New Hall
+    </a>
+</div>
+
+<div class="row g-4">
+    @foreach (var hall in Model)
+    {
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card hall-card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
+                <div class="hall-image-wrapper position-relative">
+                    @if (!string.IsNullOrEmpty(hall.ImagePath))
+                    {
+                        <img src="@hall.ImagePath" class="card-img-top hall-img" alt="@hall.Name" onerror="this.src='https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80'">
+                    }
+                    else
+                    {
+                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" class="card-img-top hall-img" alt="@hall.Name">
+                    }
+                    <div class="position-absolute top-0 end-0 p-3">
+                        @if (hall.IsActive)
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success rounded-pill px-3 py-1 font-weight-600">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary rounded-pill px-3 py-1 font-weight-600">Inactive</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title font-weight-700 text-dark mb-1">@hall.Name</h5>
+                        <p class="text-muted fs-7 mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@hall.Location</p>
+                        <p class="card-text text-secondary fs-7 line-clamp-2 mb-3">@hall.Description</p>
+
+                        <div class="d-flex align-items-center gap-3 mb-3 p-2.5 bg-light rounded-3">
+                            <div class="d-flex align-items-center text-primary">
+                                <i class="bi bi-people-fill fs-5 me-2"></i>
+                                <div>
+                                    <small class="d-block text-muted fs-8 text-uppercase">Capacity</small>
+                                    <strong class="fs-7">@hall.Capacity Seats</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(hall.Facilities))
+                        {
+                            <div class="facilities-tags mb-3">
+                                <small class="d-block text-muted fs-8 font-weight-700 text-uppercase mb-1">Facilities</small>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (var fac in hall.Facilities.Split(','))
+                                    {
+                                        <span class="badge bg-light text-dark border fs-8 rounded-2"><i class="bi bi-check2 text-primary me-1"></i>@fac.Trim()</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex gap-2 pt-3 border-top mt-2">
+                        <a asp-action="EditHall" asp-route-id="@hall.Id" class="btn btn-outline-primary btn-sm flex-grow-1 font-weight-600">
+                            <i class="bi bi-pencil-square me-1"></i> Edit Details
+                        </a>
+                        <form asp-action="ToggleHallStatus" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@hall.Id" />
+                            <button type="submit" class="btn btn-sm @(hall.IsActive ? "btn-outline-warning" : "btn-outline-success") font-weight-600">
+                                @(hall.IsActive ? "Deactivate" : "Activate")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

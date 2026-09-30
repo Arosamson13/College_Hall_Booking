@@ -1,0 +1,59 @@
+@model IEnumerable<CollegeHallBooking.Models.Hall>
+@{
+    ViewData["Title"] = "Available College Halls";
+}
+
+<div class="mb-4">
+    <h3 class="font-weight-700 mb-1">Browse Halls & Facilities</h3>
+    <p class="text-muted mb-0">Explore campus venues, capacities, and amenities before submitting your reservation request</p>
+</div>
+
+<div class="row g-4">
+    @foreach (var hall in Model)
+    {
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card hall-card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white d-flex flex-column justify-content-between">
+                <div>
+                    <div class="position-relative">
+                        @if (!string.IsNullOrEmpty(hall.ImagePath))
+                        {
+                            <img src="@hall.ImagePath" class="card-img-top hall-img" alt="@hall.Name" onerror="this.src='https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80'">
+                        }
+                        else
+                        {
+                            <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" class="card-img-top hall-img" alt="@hall.Name">
+                        }
+                        <div class="position-absolute bottom-0 start-0 p-3 bg-gradient-dark-overlay text-white w-100">
+                            <span class="badge bg-primary px-3 py-1.5 font-weight-600 rounded-pill"><i class="bi bi-people-fill me-1"></i>Cap: @hall.Capacity Seats</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4">
+                        <h5 class="font-weight-700 text-dark mb-1">@hall.Name</h5>
+                        <p class="text-muted fs-7 mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@hall.Location</p>
+                        <p class="card-text text-secondary fs-7 line-clamp-2 mb-3">@hall.Description</p>
+
+                        @if (!string.IsNullOrEmpty(hall.Facilities))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block text-muted fs-8 font-weight-700 text-uppercase mb-1">Key Facilities</small>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (var fac in hall.Facilities.Split(','))
+                                    {
+                                        <span class="badge bg-light text-dark border fs-8 rounded-2"><i class="bi bi-check-lg text-success me-1"></i>@fac.Trim()</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="p-4 pt-0">
+                    <a asp-action="BookRequest" asp-route-hallId="@hall.Id" class="btn btn-primary w-100 font-weight-600 py-2 rounded-3 shadow-sm">
+                        <i class="bi bi-calendar-plus me-1"></i> Reserve This Hall
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

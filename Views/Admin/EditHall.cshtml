@@ -1,0 +1,80 @@
+@model CollegeHallBooking.ViewModels.HallFormViewModel
+@{
+    ViewData["Title"] = "Edit College Hall";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 bg-white">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <h4 class="font-weight-700 mb-0">Edit Hall: @Model.Name</h4>
+                <p class="text-muted fs-7 mb-0">Update information, facilities or upload a new photo</p>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="EditHall" method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="ExistingImagePath" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
+                    {
+                        <div class="mb-3 text-center">
+                            <img src="@Model.ExistingImagePath" class="img-thumbnail rounded-3" style="max-height: 180px; object-fit: cover;" alt="Current Photo">
+                            <small class="d-block text-muted mt-1">Current Hall Photo</small>
+                        </div>
+                    }
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label font-weight-600"></label>
+                            <input asp-for="Name" class="form-control bg-light" />
+                            <span asp-validation-for="Name" class="text-danger fs-7"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Location" class="form-label font-weight-600"></label>
+                            <input asp-for="Location" class="form-control bg-light" />
+                            <span asp-validation-for="Location" class="text-danger fs-7"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Capacity" class="form-label font-weight-600"></label>
+                            <input asp-for="Capacity" type="number" class="form-control bg-light" />
+                            <span asp-validation-for="Capacity" class="text-danger fs-7"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ImageFile" class="form-label font-weight-600">Replace Photo (Optional)</label>
+                            <input asp-for="ImageFile" type="file" class="form-control bg-light" accept="image/*" />
+                            <span asp-validation-for="ImageFile" class="text-danger fs-7"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Facilities" class="form-label font-weight-600"></label>
+                        <input asp-for="Facilities" class="form-control bg-light" />
+                        <span asp-validation-for="Facilities" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label font-weight-600"></label>
+                        <textarea asp-for="Description" class="form-control bg-light" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger fs-7"></span>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" asp-for="IsActive" id="isActive">
+                        <label class="form-check-label font-weight-600" for="isActive">Active & Available for Booking</label>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Halls" class="btn btn-light px-4 font-weight-600">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 font-weight-600">
+                            <i class="bi bi-check-circle me-1"></i> Update Hall
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
